@@ -1,4 +1,4 @@
-version = "0.1"
+version = "0.1.1"
 
 from .models import ParseException, Testcase, Test, TestcaseResult
 from .tabbing import tab, detab
