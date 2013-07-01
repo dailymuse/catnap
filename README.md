@@ -27,36 +27,38 @@ Options:
 
 Tests are specified in YAML files. Here's an example test specification:
 
-    name: github
-    testcases:
-      # A very basic request
-      - name: homepage
-        url: http://github.com
-        code: 200
-        # Check to make sure we were redirected to https
-        response_url: https://github.com/
-        response_headers:
-          content-type: text/html; charset=utf-8
+```YAML
+name: github
+testcases:
+  # A very basic request
+  - name: homepage
+    url: http://github.com
+    code: 200
+    # Check to make sure we were redirected to https
+    response_url: https://github.com/
+    response_headers:
+      content-type: text/html; charset=utf-8
 
-      # Demostrates the use of some more advanced features: auth, on_request and
-      # on_response
-      - name: create a new gist with bad auth
-        method: POST
-        url: https://api.github.com/gists
-        # Authenticate using HTTP basic with username foo and password bar
-        auth: basic foo bar
-        response_headers:
-          content-type: application/json; charset=utf-8
-        on_request: 'print "on_request:", request, response'
-        on_response: |
-          json = response.json()
+  # Demostrates the use of some more advanced features: auth, on_request and
+  # on_response
+  - name: create a new gist with bad auth
+    method: POST
+    url: https://api.github.com/gists
+    # Authenticate using HTTP basic with username foo and password bar
+    auth: basic foo bar
+    response_headers:
+      content-type: application/json; charset=utf-8
+    on_request: 'print "on_request:", request, response'
+    on_response: |
+      json = response.json()
 
-          if response.status_code == 401:
-            assert json["message"] == "Bad credentials", ""
-          elif response.status_code == 403:
-            assert json["message"] == "Max number of login attempt exceeded", ""
-          else:
-            raise Exception("Unexpected status code: %s" % response.status_code)
+      if response.status_code == 401:
+        assert json["message"] == "Bad credentials", ""
+      elif response.status_code == 403:
+        assert json["message"] == "Max number of login attempt exceeded", ""
+      else:
+        raise Exception("Unexpected status code: %s" % response.status_code)
+```
 
 Test files specify a name (in this example, `github`), and a list of testcases. Each testcase will make a request and validate the response against the spec.
 
