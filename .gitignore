@@ -1,0 +1,9 @@
+/build
+*.pyo
+*.pyc
+*.egg-info
+.Python
+/bin
+/dist
+/include
+/lib

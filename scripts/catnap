@@ -1,0 +1,100 @@
+#!/usr/bin/env python
+
+import os
+import sys
+import optfn
+import catnap
+import requests
+import traceback
+
+# Character sequence for ending a color
+ANSI_COLOR_SEQUENCE_END = "\033[0m"
+
+# Mapping of status messages to character sequences for beginning the status'
+# color
+STATUS_MESSAGES_ANSI_COLORS = {
+    "passed": "\033[92m",
+    "failed": "\033[91m",
+}
+
+def print_status(name, status, out=sys.stdout):
+    """Prints a status message"""
+    status_begin_color = STATUS_MESSAGES_ANSI_COLORS[status] if out.isatty() else ""
+    status_end_color = ANSI_COLOR_SEQUENCE_END if out.isatty() else ""
+    status_message = "%s[%s]%s " % (status_begin_color, status, status_end_color)
+    out.write("".join([status_message, name, "\n"]))
+
+def execute_test(test, enable_cookies, request_options, verbose=False):
+    """
+    Executes all of the testcases in a test, printing the status and results
+    to stdout
+    """
+
+    print "Executing test %s..." % test.name
+
+    # Create a test-wide session if cookies are enabled; otherwise a new
+    # session will be constructed for each testcase
+    session = requests.Session() if enable_cookies else None
+
+    for testcase in test.testcases:
+        # Run the test
+        result = catnap.execute_testcase(testcase, session=session, request_options=request_options)
+
+        # Print the status
+        print_status(testcase.name, "failed" if result.failed else "passed")
+
+        # Give an explanation if the status failed
+        if result.failed:
+            if verbose:
+                print "  reason:"
+                formatted_error = traceback.format_exception(result.error_type, result.error, result.error_traceback)
+                print catnap.tab("".join(formatted_error), 4)
+            else:
+                print "  reason: %s" % result.error.message
+        
+        # Print the buffered stdout/stderr if it exists
+        if result.stdout:
+            print "  stdout:"
+            print catnap.tab(result.stdout, 4)
+
+        if result.stderr:
+            print "  stderr:"
+            print catnap.tab(result.stderr, 4)
+
+        yield result
+
+def main(test_path, verbose=False, timeout=10, cookies=False, allow_redirects=False, verify_ssl_certs=False, http_proxy=None, https_proxy=None):
+    """Usage: %prog <test file> [options]"""
+
+    # Construct the request options
+    request_options = dict(
+        timeout=timeout,
+        allow_redirects=allow_redirects,
+        verify=verify_ssl_certs,
+    )
+
+    if http_proxy or https_proxy:
+        request_options["proxies"] = {}
+
+        if http_proxy:
+            request_options["proxies"]["http"] = http_proxy
+
+        if https_proxy:
+            request_options["proxies"]["https"] = https_proxy
+
+    failures = False
+
+    # Run the test, setting `failures` to `True` if a testcase fails
+    with open(test_path, "r") as f:
+        test = catnap.parse_yaml(f)
+        
+        for result in execute_test(test, cookies, request_options, verbose=verbose):
+            if result.failed:
+                failures = True
+
+    # Return status code 1 if a testcase failed; 0 otherwise
+    return 1 if failures else 0
+
+if __name__ == "__main__":
+    retr = optfn.run(main)
+    sys.exit(retr if retr != optfn.ERROR_RETURN_CODE else -1)
