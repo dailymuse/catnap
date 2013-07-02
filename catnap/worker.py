@@ -57,7 +57,7 @@ def execute_testcase(testcase, session=None, request_options={}):
 
         # Validate the response body
         if testcase.response_body:
-            assert response.text == testcase.response_body, "Unexpected response body"
+            assert response.content == testcase.response_body, "Unexpected response body"
 
         # Run the `on_response` code if specified
         if testcase.on_response:
