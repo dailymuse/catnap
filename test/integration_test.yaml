@@ -16,6 +16,18 @@ testcases:
       content-type: application/octet-stream
     response_url: http://localhost:8000/sample.bin
     base64_response_body: "PGGsFFnbRANBIIP9RJspxizCqCNharo4YEhnLNVdjKI="
+  - name: GET a JSON file
+    url: http://localhost:8000/sample.json
+    code: 200
+    response_headers:
+      content-length: "63"
+      content-type: application/json
+    response_url: http://localhost:8000/sample.json
+    json_response_body: >
+      {
+          "somekey": "somevalue",
+          "arraykey": [1, 2, 3, 4, 5]
+      }
   - name: GET non-existent file
     url: http://localhost:8000/foo.txt
     code: 404

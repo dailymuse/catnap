@@ -57,7 +57,15 @@ def execute_testcase(testcase, session=None, request_options={}):
 
         # Validate the response body
         if testcase.response_body:
-            assert response.content == testcase.response_body, "Unexpected response body"
+            actual_value = response.content
+
+            if testcase.response_body_parser:
+                try:
+                    actual_value = testcase.response_body_parser(actual_value)
+                except Exception, e:
+                    raise Exception("Could not parse the response body: %s" % e.message)
+
+            assert actual_value == testcase.response_body, "Unexpected response body"
 
         # Run the `on_response` code if specified
         if testcase.on_response:

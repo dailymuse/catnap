@@ -173,16 +173,23 @@ class Testcase(object):
 
         # Set the expected response body
         t.response_body = None
+        t.response_body_parser = None
         plaintext_response_body = field("response_body", lambda b: b)
         base64_response_body = field("base64_response_body", base64.b64decode)
         file_response_body = field("file_response_body", _get_file_contents)
-        response_body = filter(lambda s: s != None, (plaintext_response_body, base64_response_body, file_response_body))
+        json_response_body = field("json_response_body", json.loads)
+        response_body = filter(lambda s: s != None, (plaintext_response_body, base64_response_body, file_response_body, json_response_body))
 
         # Throw an error if more than one response body was specified
         if len(response_body) > 1:
             raise ParseException("testcase", t.name, "More than one response body defined")
         elif len(response_body) == 1:
             t.response_body = response_body[0]
+
+            # Special case for JSON response bodies - set the parser so that
+            # the response content is converted into JSON
+            if t.response_body == json_response_body:
+                t.response_body_parser = json.loads
 
         # Set the testcase-specified python executable code
         create_compiler = lambda field_name: functools.partial(compile, filename="<%s field of %s>" % (field_name, t.name), mode="exec")

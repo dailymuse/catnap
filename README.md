@@ -94,3 +94,5 @@ You can specify one (or none) of the following per testcase:
 * `response_body`: The expected response body, specified in plaintext.
 * `base64_response_body`: The expected response body as encoded in base64 (useful for verifying binary responses).
 * `file_response_body`: The path to a file that contains the expected response body (useful for responses with large bodies).
+* `json_response_body`: A string specifying the expected JSON response. When a
+  response comes in, it will automatically be parsed as JSON and compared against this value.
