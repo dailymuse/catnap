@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name = "Catnap",
-    version = "0.1.2",
+    version = "0.2.0",
     description = "A script for running integration tests against RESTful/HTTP-based interfaces",
     author = "Yusuf Simonson",
     url = "http://github.com/dailymuse/catnap",
