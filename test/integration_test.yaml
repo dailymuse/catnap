@@ -1,0 +1,29 @@
+name: Catnap integration test
+testcases:
+  - name: GET sample text file
+    url: http://localhost:8000/sample.txt
+    code: 200
+    response_headers:
+      content-length: "29"
+      content-type: text/plain
+    response_url: http://localhost:8000/sample.txt
+    response_body: "hello from a sample text file"
+  - name: GET sample binary file
+    url: http://localhost:8000/sample.bin
+    code: 200
+    response_headers:
+      content-length: "32"
+      content-type: application/octet-stream
+    response_url: http://localhost:8000/sample.bin
+    base64_response_body: "PGGsFFnbRANBIIP9RJspxizCqCNharo4YEhnLNVdjKI="
+  - name: GET non-existent file
+    url: http://localhost:8000/foo.txt
+    code: 404
+    response_url: http://localhost:8000/foo.txt
+  - name: unsupported POST
+    method: POST
+    url: http://localhost:8000/sample.bin
+    form_body:
+      bad: request
+    code: 501
+    response_url: http://localhost:8000/sample.bin

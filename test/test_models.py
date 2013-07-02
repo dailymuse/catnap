@@ -151,7 +151,7 @@ class TestcaseModelTest(unittest.TestCase):
             self.build_testcase(base64_body="invalid base64 string")
 
     def test_file_body(self):
-        testcase = self.build_testcase(file_body="./test/samplefile.txt")
+        testcase = self.build_testcase(file_body="./test/static/sample.txt")
         self.assertEqual(testcase.body, "hello from a sample text file")
 
         with self.assertRaises(catnap.ParseException):
@@ -195,7 +195,7 @@ class TestcaseModelTest(unittest.TestCase):
             self.build_testcase(base64_response_body="invalid base64 string")
 
     def test_file_response_body(self):
-        testcase = self.build_testcase(file_response_body="./test/samplefile.txt")
+        testcase = self.build_testcase(file_response_body="./test/static/sample.txt")
         self.assertEqual(testcase.response_body, "hello from a sample text file")
 
         with self.assertRaises(catnap.ParseException):

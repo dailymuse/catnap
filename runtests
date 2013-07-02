@@ -1,0 +1,22 @@
+#!/bin/bash
+
+set -e
+
+function cleanup {
+    set +e
+    kill `jobs -p`
+}
+
+trap cleanup EXIT
+
+# Run the unit tests
+python test/test_models.py
+
+# Start the server
+pushd test/static
+python -m SimpleHTTPServer &
+popd
+
+# Run the integration tests
+./scripts/catnap test/integration_test.yaml
+INTEGRATION_TESTS_RC=$?
