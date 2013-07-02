@@ -1,5 +1,13 @@
+from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
+
 import catnap
 import requests
+
+# Python2/3 compatible way of coercing values to unicode via str()
+try:
+    str = unicode
+except NameError:
+    pass
 
 def execute_testcase(testcase, session=None, request_options={}):
     """
@@ -35,7 +43,7 @@ def execute_testcase(testcase, session=None, request_options={}):
     with catnap.TestcaseResult() as result:
         # Run the `on_request` code if specified
         if testcase.on_request:
-            exec testcase.on_request in context
+            exec(testcase.on_request in context)
 
         # Get the response
         response = session.send(request, **request_options)
@@ -50,7 +58,7 @@ def execute_testcase(testcase, session=None, request_options={}):
             assert response.url == testcase.response_url, "Expected to be redirected to URL %s, but got %s" % (testcase.response_url, response.url)
 
         # Validate the response headers
-        for key, value in testcase.response_headers.iteritems():
+        for key, value in testcase.response_headers.items():
             actual_value = response.headers.get(key)
             assert actual_value != None, "Expected header %s is missing" % key
             assert actual_value == value, "Expected header %s to be %s, but got %s" % (key, value, actual_value)
@@ -62,13 +70,13 @@ def execute_testcase(testcase, session=None, request_options={}):
             if testcase.response_body_parser:
                 try:
                     actual_value = testcase.response_body_parser(actual_value)
-                except Exception, e:
-                    raise Exception("Could not parse the response body: %s" % e.message)
+                except Exception as e:
+                    raise Exception("Could not parse the response body: %s" % str(e))
 
             assert actual_value == testcase.response_body, "Unexpected response body"
 
         # Run the `on_response` code if specified
         if testcase.on_response:
-            exec testcase.on_response in context
+            exec(testcase.on_response in context)
 
     return result

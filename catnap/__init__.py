@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
+
 version = "0.2.0"
 
 from .models import ParseException, Testcase, Test, TestcaseResult

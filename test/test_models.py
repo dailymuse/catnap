@@ -30,8 +30,8 @@ class TestModelTest(unittest.TestCase):
                 "response_url": "http://www.google.com?redirect",
                 "response_headers": { "foo": "baz" },
                 "base64_response_body": "aGVsbG8=",
-                "on_request": "print 'request'",
-                "on_response": "print 'response'",
+                "on_request": "import sys; sys.stdout.write('request')",
+                "on_response": "import sys; sys.stdout.write('response')",
             }]
         })
 
@@ -97,7 +97,7 @@ class TestcaseModelTest(unittest.TestCase):
 
     def test_url(self):
         testcase = self.build_testcase()
-        self.assertEqual(testcase.url, u"http://www.google.com")
+        self.assertEqual(testcase.url, "http://www.google.com")
 
         with self.assertRaises(catnap.ParseException):
             catnap.Testcase.parse({"name": "foo"})
@@ -206,7 +206,7 @@ class TestcaseModelTest(unittest.TestCase):
             self.build_testcase(response_body="plaintext body", file_response_body="./test/nonfile.txt")
 
     def test_valid_on_request(self):
-        testcase = self.build_testcase(on_request="print 'hi'")
+        testcase = self.build_testcase(on_request="import sys; sys.stdout.write('hi')")
         self.assertIsNotNone(testcase.on_request)
 
     def test_invalid_on_request(self):
@@ -214,7 +214,7 @@ class TestcaseModelTest(unittest.TestCase):
             self.build_testcase(on_request="!!!")
 
     def test_valid_on_response(self):
-        testcase = self.build_testcase(on_response="print 'hi'")
+        testcase = self.build_testcase(on_response="import sys; sys.stdout.write('hi')")
         self.assertIsNotNone(testcase.on_response)
 
     def test_invalid_on_response(self):

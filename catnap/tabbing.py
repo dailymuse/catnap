@@ -1,3 +1,5 @@
+from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
+
 def detab(contents):
     """
     Removes formatting tabs from Python code so it can be executed without a

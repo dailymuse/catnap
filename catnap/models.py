@@ -1,15 +1,37 @@
+from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
+
 import functools
 import json
 import sys
 import base64
-import urllib
 import requests
 import requests.auth
 
+# Python2/3 compatible way of importing string buffers
 try:
-    import cStringIO as sio
-except:
-    import StringIO as sio
+    import io
+except ImportError:
+    try:
+        import cStringIO as io
+    except ImportError:
+        import StringIO as io
+
+# Python2/3 compatible way of importing urlencode
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+
+# Python2/3 compatible way of providing consistent string coercions
+try:
+    bytes
+except NameError:
+    bytes = str
+
+try:
+    str = unicode
+except NameError:
+    pass
 
 class ParseException(Exception):
     """An exception that occurrs while parsing a test specification"""
@@ -42,9 +64,9 @@ def _get_field(data_type, data, field_name, parser, required=False):
             # Parse the field value or throw an error
             try:
                 value = parser(value)
-            except Exception, e:
+            except Exception as e:
                 data_name = data.get("name", "unknown")
-                raise ParseException(data_type, data_name, "Could not parse field %s: %s" % (field_name, e.message))
+                raise ParseException(data_type, data_name, "Could not parse field %s: %s" % (field_name, str(e)))
 
         return value
     elif required:
@@ -96,8 +118,8 @@ class TestcaseResult(object):
         # Temporarily replace stdout/stderr with a string buffer
         self._old_stdout = sys.stdout
         self._old_stderr = sys.stderr
-        sys.stdout = self._captured_stdout = sio.StringIO()
-        sys.stderr = self._captured_stderr = sio.StringIO()
+        sys.stdout = self._captured_stdout = io.StringIO()
+        sys.stderr = self._captured_stderr = io.StringIO()
         return self
 
     def __exit__(self, type, value, traceback):
@@ -145,9 +167,9 @@ class Testcase(object):
         field = functools.partial(_get_field, "testcase", data)
 
         # Get the request fields
-        t = cls(field("name", unicode, required=True))
-        t.method = field("method", lambda m: unicode(m).upper()) or "GET"
-        t.url = field("url", unicode, required=True)
+        t = cls(field("name", str, required=True))
+        t.method = field("method", lambda m: str(m).upper()) or "GET"
+        t.url = field("url", str, required=True)
         t.query_params = field("query_params", dict) or {}
         t.headers = field("headers", dict) or {}
         t.auth = field("auth", _auth_config_parser)
@@ -155,10 +177,10 @@ class Testcase(object):
         # Get the request body payload
         t.body = None
         plaintext_body = field("body", lambda b: b)
-        form_body = field("form_body", lambda b: urllib.urlencode(dict(b)))
-        base64_body = field("base64_body", base64.b64decode)
+        form_body = field("form_body", lambda b: urlencode(dict(b)))
+        base64_body = field("base64_body", lambda b: base64.b64decode(bytes(b)))
         file_body = field("file_body", _get_file_contents)
-        body = filter(lambda s: s != None, (plaintext_body, form_body, base64_body, file_body))
+        body = [s for s in (plaintext_body, form_body, base64_body, file_body) if s != None]
 
         # Throw an error if more than one request body was specified
         if len(body) > 1:
@@ -168,17 +190,17 @@ class Testcase(object):
 
         # Set the response fields
         t.code = field("code", int)
-        t.response_url = field("response_url", unicode)
+        t.response_url = field("response_url", str)
         t.response_headers = field("response_headers", dict) or {}
 
         # Set the expected response body
         t.response_body = None
         t.response_body_parser = None
         plaintext_response_body = field("response_body", lambda b: b)
-        base64_response_body = field("base64_response_body", base64.b64decode)
+        base64_response_body = field("base64_response_body", lambda b: base64.b64decode(bytes(b)))
         file_response_body = field("file_response_body", _get_file_contents)
         json_response_body = field("json_response_body", json.loads)
-        response_body = filter(lambda s: s != None, (plaintext_response_body, base64_response_body, file_response_body, json_response_body))
+        response_body = [s for s in (plaintext_response_body, base64_response_body, file_response_body, json_response_body) if s != None]
 
         # Throw an error if more than one response body was specified
         if len(response_body) > 1:
@@ -217,7 +239,7 @@ class Test(object):
         """
         
         field = functools.partial(_get_field, "test", data)
-        test = cls(field("name", unicode, required=True))
+        test = cls(field("name", str, required=True))
 
         for testcase_data in field("testcases", list, required=True):
             test.testcases.append(Testcase.parse(testcase_data))

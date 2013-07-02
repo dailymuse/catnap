@@ -18,7 +18,7 @@ testcases:
     auth: basic foo bar
     response_headers:
       content-type: application/json; charset=utf-8
-    on_request: 'print "on_request:", request, response'
+    on_request: 'import sys; sys.stdout.write("on_request: %s, %s" % (request, response))'
     on_response: |
       json = response.json()
 
