@@ -10,7 +10,7 @@ function cleanup {
 trap cleanup EXIT
 
 # Run the unit tests
-python test/test_models.py
+PYTHONPATH=.:$PYTHONPATH python test/test_models.py
 
 # Start the server
 pushd test/static
@@ -18,5 +18,4 @@ python -m SimpleHTTPServer &
 popd
 
 # Run the integration tests
-./scripts/catnap test/integration_test.yaml
-INTEGRATION_TESTS_RC=$?
+PYTHONPATH=.:$PYTHONPATH ./scripts/catnap test/integration_test.yaml
