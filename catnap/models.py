@@ -6,32 +6,7 @@ import sys
 import base64
 import requests
 import requests.auth
-
-# Python2/3 compatible way of importing string buffers
-try:
-    import io
-except ImportError:
-    try:
-        import cStringIO as io
-    except ImportError:
-        import StringIO as io
-
-# Python2/3 compatible way of importing urlencode
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib import urlencode
-
-# Python2/3 compatible way of providing consistent string coercions
-try:
-    bytes
-except NameError:
-    bytes = str
-
-try:
-    str = unicode
-except NameError:
-    pass
+from .compat import *
 
 class ParseException(Exception):
     """An exception that occurrs while parsing a test specification"""
@@ -118,8 +93,8 @@ class TestcaseResult(object):
         # Temporarily replace stdout/stderr with a string buffer
         self._old_stdout = sys.stdout
         self._old_stderr = sys.stderr
-        sys.stdout = self._captured_stdout = io.StringIO()
-        sys.stderr = self._captured_stderr = io.StringIO()
+        sys.stdout = self._captured_stdout = StringIO()
+        sys.stderr = self._captured_stderr = StringIO()
         return self
 
     def __exit__(self, type, value, traceback):
@@ -177,7 +152,7 @@ class Testcase(object):
         # Get the request body payload
         t.body = None
         plaintext_body = field("body", lambda b: b)
-        form_body = field("form_body", lambda b: urlencode(dict(b)))
+        form_body = field("form_body", lambda b: urllib.urlencode(dict(b)))
         base64_body = field("base64_body", lambda b: base64.b64decode(bytes(b)))
         file_body = field("file_body", _get_file_contents)
         body = [s for s in (plaintext_body, form_body, base64_body, file_body) if s != None]
