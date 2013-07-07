@@ -66,8 +66,8 @@ class TestModelTest(unittest.TestCase):
         self.assertEqual(t2.response_url, "http://www.google.com?redirect")
         self.assertEqual(t2.response_headers, { "foo": "baz" })
         self.assertEqual(t2.response_body, "hello")
-        self.assertIsNotNone(t2.on_request)
-        self.assertIsNotNone(t2.on_response)
+        self.assertNotEqual(t2.on_request, None)
+        self.assertNotEqual(t2.on_response, None)
 
 class TestcaseModelTest(unittest.TestCase):
     def build_testcase(self, **kwargs):
@@ -106,13 +106,13 @@ class TestcaseModelTest(unittest.TestCase):
 
     def test_basic_auth(self):
         testcase = self.build_testcase(auth="basic user pass")
-        self.assertIsInstance(testcase.auth, requests.auth.HTTPBasicAuth)
+        self.assertTrue(isinstance(testcase.auth, requests.auth.HTTPBasicAuth))
         self.assertEqual(testcase.auth.username, "user")
         self.assertEqual(testcase.auth.password, "pass")
 
     def test_digest_auth(self):
         testcase = self.build_testcase(auth="digest user pass")
-        self.assertIsInstance(testcase.auth, requests.auth.HTTPDigestAuth)
+        self.assertTrue(isinstance(testcase.auth, requests.auth.HTTPDigestAuth))
         self.assertEqual(testcase.auth.username, "user")
         self.assertEqual(testcase.auth.password, "pass")
 
@@ -125,7 +125,7 @@ class TestcaseModelTest(unittest.TestCase):
 
     def test_form_body(self):
         testcase = self.build_testcase(form_body={"hello": "world", "foo": "bar"})
-        self.assertIn(testcase.body, ["hello=world&foo=bar", "foo=bar&hello=world"])
+        self.assertTrue(testcase.body in ["hello=world&foo=bar", "foo=bar&hello=world"])
         self.assertRaises(catnap.ParseException, self.build_testcase, form_body="invalidbody")
 
     def test_base64_body(self):
@@ -178,14 +178,14 @@ class TestcaseModelTest(unittest.TestCase):
 
     def test_valid_on_request(self):
         testcase = self.build_testcase(on_request="import sys; sys.stdout.write('hi')")
-        self.assertIsNotNone(testcase.on_request)
+        self.assertNotEqual(testcase.on_request, None)
 
     def test_invalid_on_request(self):
         self.assertRaises(catnap.ParseException, self.build_testcase, on_request="!!!")
 
     def test_valid_on_response(self):
         testcase = self.build_testcase(on_response="import sys; sys.stdout.write('hi')")
-        self.assertIsNotNone(testcase.on_response)
+        self.assertNotEqual(testcase.on_response, None)
 
     def test_invalid_on_response(self):
         self.assertRaises(catnap.ParseException, self.build_testcase, on_response="!!!")
