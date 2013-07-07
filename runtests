@@ -27,4 +27,4 @@ fi
 popd
 
 # Run the integration tests
-PYTHONPATH=.:$PYTHONPATH ./scripts/catnap test/integration_test.yaml
+PYTHONPATH=.:$PYTHONPATH ./scripts/catnap test/integration_test.yaml --verbose
