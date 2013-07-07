@@ -14,7 +14,16 @@ PYTHONPATH=.:$PYTHONPATH python test/test_models.py
 
 # Start the server
 pushd test/static
-python -m SimpleHTTPServer &
+
+PYTHON_MAJOR_VERSION=`python -c "import sys; sys.stdout.write(str(sys.version_info[0]))"`
+
+if [[ $PYTHON_MAJOR_VERSION -eq "3" ]]; then
+    python -m http.server &
+else
+    python -m SimpleHTTPServer &
+fi
+
+
 popd
 
 # Run the integration tests
