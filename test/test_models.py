@@ -4,12 +4,10 @@ import requests.auth
 
 class TestModelTest(unittest.TestCase):
     def test_missing_name(self):
-        with self.assertRaises(catnap.ParseException):
-            catnap.Test.parse({"testcases": []})
+        self.assertRaises(catnap.ParseException, catnap.Test.parse, {"testcases": []})
 
     def test_missing_testcases(self):
-        with self.assertRaises(catnap.ParseException):
-            catnap.Test.parse({"name": "foo"})
+        self.assertRaises(catnap.ParseException, catnap.Test.parse, {"name": "foo"})
 
     def test_valid(self):
         test = catnap.Test.parse({
@@ -84,37 +82,27 @@ class TestcaseModelTest(unittest.TestCase):
     def test_name(self):
         testcase = self.build_testcase()
         self.assertEqual(testcase.name, "foo")
-
-        with self.assertRaises(catnap.ParseException):
-            catnap.Testcase.parse({"url": "foo"})
+        self.assertRaises(catnap.ParseException, catnap.Testcase.parse, {"url": "foo"})
 
     def test_method(self):
         testcase = self.build_testcase(method="get")
         self.assertEqual(testcase.method, "GET")
-
-        with self.assertRaises(catnap.ParseException):
-            catnap.Testcase.parse({"method": None})
+        self.assertRaises(catnap.ParseException, catnap.Testcase.parse, {"method": None})
 
     def test_url(self):
         testcase = self.build_testcase()
         self.assertEqual(testcase.url, "http://www.google.com")
-
-        with self.assertRaises(catnap.ParseException):
-            catnap.Testcase.parse({"name": "foo"})
+        self.assertRaises(catnap.ParseException, catnap.Testcase.parse, {"name": "foo"})
 
     def test_query_params(self):
         testcase = self.build_testcase(query_params={"hello": "world"})
         self.assertEqual(testcase.query_params, {"hello": "world"})
-
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(query_params=None)
+        self.assertRaises(catnap.ParseException, self.build_testcase, query_params=None)
 
     def test_headers(self):
         testcase = self.build_testcase(headers={"hello": "world"})
         self.assertEqual(testcase.headers, {"hello": "world"})
-
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(headers=None)
+        self.assertRaises(catnap.ParseException, self.build_testcase, headers=None)
 
     def test_basic_auth(self):
         testcase = self.build_testcase(auth="basic user pass")
@@ -129,8 +117,7 @@ class TestcaseModelTest(unittest.TestCase):
         self.assertEqual(testcase.auth.password, "pass")
 
     def test_bad_auth(self):
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(auth="unknown user pass")
+        self.assertRaises(catnap.ParseException, self.build_testcase, auth="unknown user pass")
 
     def test_body(self):
         testcase = self.build_testcase(body="body test")
@@ -139,35 +126,27 @@ class TestcaseModelTest(unittest.TestCase):
     def test_form_body(self):
         testcase = self.build_testcase(form_body={"hello": "world", "foo": "bar"})
         self.assertIn(testcase.body, ["hello=world&foo=bar", "foo=bar&hello=world"])
-
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(form_body="invalidbody")
+        self.assertRaises(catnap.ParseException, self.build_testcase, form_body="invalidbody")
 
     def test_base64_body(self):
         testcase = self.build_testcase(base64_body="aGVsbG8=")
         self.assertEqual(testcase.body, "hello")
-
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(base64_body="invalid base64 string")
+        self.assertRaises(catnap.ParseException, self.build_testcase, base64_body="invalid base64 string")
 
     def test_file_body(self):
         testcase = self.build_testcase(file_body="./test/static/sample.txt")
         self.assertEqual(testcase.body, "hello from a sample text file")
-
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(file_body="./test/nonfile.txt")
+        self.assertRaises(catnap.ParseException, self.build_testcase, file_body="./test/nonfile.txt")
 
     def test_invalid_multibody(self):
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(body="plaintext body", file_body="./test/nonfile.txt")
+        self.assertRaises(catnap.ParseException, self.build_testcase, body="plaintext body", file_body="./test/nonfile.txt")
 
     def test_valid_code(self):
         testcase = self.build_testcase(code="400")
         self.assertEqual(testcase.code, 400)
 
     def test_invalid_code(self):
-        with self.assertRaises(catnap.ParseException):
-            testcase = self.build_testcase(code=None)
+        self.assertRaises(catnap.ParseException, self.build_testcase, code=None)
 
     def test_response_body(self):
         testcase = self.build_testcase(response_body="body test")
@@ -176,50 +155,40 @@ class TestcaseModelTest(unittest.TestCase):
     def test_response_url(self):
         testcase = self.build_testcase(response_url="foobar")
         self.assertEqual(testcase.response_url, "foobar")
-
-        with self.assertRaises(catnap.ParseException):
-            catnap.Testcase.parse({"name": "foo", "response_url": None})
+        self.assertRaises(catnap.ParseException, catnap.Testcase.parse, {"name": "foo", "response_url": None})
 
     def test_response_headers(self):
         testcase = self.build_testcase(response_headers={"hello": "world"})
         self.assertEqual(testcase.response_headers, {"hello": "world"})
-
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(response_headers=None)
+        self.assertRaises(catnap.ParseException, self.build_testcase, response_headers=None)
 
     def test_base64_response_body(self):
         testcase = self.build_testcase(base64_response_body="aGVsbG8=")
         self.assertEqual(testcase.response_body, "hello")
-
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(base64_response_body="invalid base64 string")
+        self.assertRaises(catnap.ParseException, self.build_testcase, base64_response_body="invalid base64 string")
 
     def test_file_response_body(self):
         testcase = self.build_testcase(file_response_body="./test/static/sample.txt")
         self.assertEqual(testcase.response_body, "hello from a sample text file")
 
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(file_response_body="./test/nonfile.txt")
+        self.assertRaises(catnap.ParseException, self.build_testcase, file_response_body="./test/nonfile.txt")
 
     def test_invalid_response_multibody(self):
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(response_body="plaintext body", file_response_body="./test/nonfile.txt")
+        self.assertRaises(catnap.ParseException, self.build_testcase, response_body="plaintext body", file_response_body="./test/nonfile.txt")
 
     def test_valid_on_request(self):
         testcase = self.build_testcase(on_request="import sys; sys.stdout.write('hi')")
         self.assertIsNotNone(testcase.on_request)
 
     def test_invalid_on_request(self):
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(on_request="!!!")
+        self.assertRaises(catnap.ParseException, self.build_testcase, on_request="!!!")
 
     def test_valid_on_response(self):
         testcase = self.build_testcase(on_response="import sys; sys.stdout.write('hi')")
         self.assertIsNotNone(testcase.on_response)
 
     def test_invalid_on_response(self):
-        with self.assertRaises(catnap.ParseException):
-            self.build_testcase(on_response="!!!")
+        self.assertRaises(catnap.ParseException, self.build_testcase, on_response="!!!")
 
 if __name__ == "__main__":
     unittest.main()
