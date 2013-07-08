@@ -1,4 +1,4 @@
-# catnap #
+# catnap [![Build Status](https://travis-ci.org/dailymuse/catnap.png)](https://travis-ci.org/dailymuse/catnap) #
 
 Catnap is a simple command line utility that allows you to write integration
 tests for HTTP-based interfaces via declarative YAML specifications. When a
