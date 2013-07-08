@@ -45,11 +45,13 @@ class TestModelTest(unittest.TestCase):
         self.assertEqual(t1.query_params, {})
         self.assertEqual(t1.headers, {})
         self.assertEqual(t1.auth, None)
+        self.assertEqual(t1.body_type, None)
         self.assertEqual(t1.body, None)
         self.assertEqual(t1.code, None)
         self.assertEqual(t1.response_url, None)
         self.assertEqual(t1.response_headers, {})
-        self.assertEqual(t1.response_body_checker, None)
+        self.assertEqual(t1.response_body_type, None)
+        self.assertEqual(t1.response_body, None)
         self.assertEqual(t1.on_request, None)
         self.assertEqual(t1.on_response, None)
 
@@ -62,11 +64,13 @@ class TestModelTest(unittest.TestCase):
         self.assertEqual(t2.headers, { "foo": "bar" })
         self.assertEqual(t2.auth.username, "user")
         self.assertEqual(t2.auth.password, "pass")
+        self.assertEqual(t2.body_type, "form_body")
         self.assertEqual(t2.body, "form_key=form_value")
         self.assertEqual(t2.code, 200)
         self.assertEqual(t2.response_url, "http://www.google.com?redirect")
         self.assertEqual(t2.response_headers, { "foo": "baz" })
-        self.assertNotEqual(t2.response_body_checker, None)
+        self.assertEqual(t2.response_body_type, "base64_response_body")
+        self.assertEqual(t2.response_body, "hello")
         self.assertNotEqual(t2.on_request, None)
         self.assertNotEqual(t2.on_response, None)
 
@@ -151,7 +155,8 @@ class TestcaseModelTest(unittest.TestCase):
 
     def test_response_body(self):
         testcase = self.build_testcase(response_body="body test")
-        self.assertNotEqual(testcase.response_body_checker, None)
+        self.assertEqual(testcase.response_body_type, "response_body")
+        self.assertEqual(testcase.response_body, "body test")
 
     def test_response_url(self):
         testcase = self.build_testcase(response_url="foobar")
@@ -165,12 +170,14 @@ class TestcaseModelTest(unittest.TestCase):
 
     def test_base64_response_body(self):
         testcase = self.build_testcase(base64_response_body="aGVsbG8=")
-        self.assertNotEqual(testcase.response_body_checker, None)
+        self.assertEqual(testcase.response_body_type, "base64_response_body")
+        self.assertEqual(testcase.response_body, "hello")
         self.assertRaises(catnap.ParseException, self.build_testcase, base64_response_body="invalid base64 string")
 
     def test_file_response_body(self):
         testcase = self.build_testcase(file_response_body="./test/static/sample.txt")
-        self.assertNotEqual(testcase.response_body_checker, None)
+        self.assertEqual(testcase.response_body_type, "file_response_body")
+        self.assertEqual(testcase.response_body, "hello from a sample text file")
         self.assertRaises(catnap.ParseException, self.build_testcase, file_response_body="./test/nonfile.txt")
 
     def test_invalid_response_multibody(self):

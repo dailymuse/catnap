@@ -64,8 +64,18 @@ def execute_testcase(testcase, session=None, request_options={}):
             assert actual_value == value, "Expected header %s to be %s, but got %s" % (key, value, actual_value)
 
         # Validate the response body
-        if testcase.response_body_checker:
-            assert testcase.response_body_checker(response), "Unexpected response body"
+        if testcase.response_body_type:
+            # Run assertions on different parts of the response based on the
+            # provided expected response body. JSON is compared against
+            # serialized data structures; base64-encoded is compared against a
+            # binary version of the response body; everything else is compared
+            # to a plaintext version of the response body.
+            if testcase.response_body_type == "json_response_body":
+                assert response.json() == testcase.response_body
+            elif testcase.response_body_type == "base64_response_body":
+                assert response.content == testcase.response_body
+            else:
+                assert response.text == testcase.response_body
 
         # Run the `on_response` code if specified
         if testcase.on_response:

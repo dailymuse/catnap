@@ -132,6 +132,17 @@ class Testcase(object):
         self.name = name
 
     @classmethod
+    def _choose_field(cls, testcase, data, field_type_name, **fields):
+        all_fields = ((field, _get_field("testcase", data, field, parser)) for (field, parser) in fields.items())
+        set_fields = [(field, value) for (field, value) in all_fields if value != None]
+
+        if len(set_fields) > 1:
+            raise ParseException("testcase", testcase.name, "More than one %s defined" % field_type_name)
+        else:
+            setattr(testcase, "%s_type" % field_type_name, set_fields[0][0] if set_fields else None)
+            setattr(testcase, field_type_name, set_fields[0][1] if set_fields else None)
+
+    @classmethod
     def parse(cls, data):
         """
         Parses a testcase into a model
@@ -150,18 +161,12 @@ class Testcase(object):
         t.auth = field("auth", _auth_config_parser)
 
         # Get the request body payload
-        t.body = None
-        plaintext_body = field("body", lambda b: b)
-        form_body = field("form_body", lambda b: urllib.urlencode(dict(b)))
-        base64_body = field("base64_body", lambda b: base64.b64decode(bytes(b)))
-        file_body = field("file_body", _get_file_contents)
-        body = [s for s in (plaintext_body, form_body, base64_body, file_body) if s != None]
-
-        # Throw an error if more than one request body was specified
-        if len(body) > 1:
-            raise ParseException("testcase", t.name, "More than one request body defined")
-        elif len(body) == 1:
-            t.body = body[0]
+        cls._choose_field(t, data, "body",
+            body=lambda b: b,
+            form_body=lambda b: urllib.urlencode(dict(b)),
+            base64_body=lambda b: base64.b64decode(bytes(b)),
+            file_body=_get_file_contents
+        )
 
         # Set the response fields
         t.code = field("code", int)
@@ -169,28 +174,12 @@ class Testcase(object):
         t.response_headers = field("response_headers", dict) or {}
 
         # Set the expected response body
-        t.response_body_checker = None
-        plaintext_response_body = field("response_body", lambda b: b)
-        base64_response_body = field("base64_response_body", lambda b: base64.b64decode(bytes(b)))
-        file_response_body = field("file_response_body", _get_file_contents)
-        json_response_body = field("json_response_body", json.loads)
-        response_body = [s for s in (plaintext_response_body, base64_response_body, file_response_body, json_response_body) if s != None]
-
-        # Throw an error if more than one response body was specified
-        if len(response_body) > 1:
-            raise ParseException("testcase", t.name, "More than one response body defined")
-        elif len(response_body) == 1:
-            # Provide a function that takes as input an HTTP response, and
-            # determines if the response body is legit based on the one
-            # provided in the testcase. JSON is compared against serialized
-            # versions; base64-encoded expected responses are compared against
-            # binary; otherwise, plaintext is compared.
-            if json_response_body:
-                t.response_body_checker = lambda response: response.json() == response_body[0]
-            elif base64_response_body:
-                t.response_body_checker = lambda response: response.content == response_body[0]
-            else:
-                t.response_body_checker = lambda response: response.text == response_body[0]
+        cls._choose_field(t, data, "response_body",
+            response_body=lambda b: b,
+            base64_response_body=lambda b: base64.b64decode(bytes(b)),
+            file_response_body=_get_file_contents,
+            json_response_body=json.loads
+        )
 
         # Set the testcase-specified python executable code
         create_compiler = lambda field_name: functools.partial(compile, filename="<%s field of %s>" % (field_name, t.name), mode="exec")
