@@ -153,7 +153,7 @@ class Testcase(object):
         t.body = None
         plaintext_body = field("body", lambda b: b)
         form_body = field("form_body", lambda b: urllib.urlencode(dict(b)))
-        base64_body = field("base64_body", lambda b: base64.b64decode(bytes(b)))
+        base64_body = field("base64_body", lambda b: base64.b64decode(b))
         file_body = field("file_body", _get_file_contents)
         body = [s for s in (plaintext_body, form_body, base64_body, file_body) if s != None]
 
@@ -169,10 +169,9 @@ class Testcase(object):
         t.response_headers = field("response_headers", dict) or {}
 
         # Set the expected response body
-        t.response_body = None
-        t.response_body_parser = None
+        t.response_body_checker = None
         plaintext_response_body = field("response_body", lambda b: b)
-        base64_response_body = field("base64_response_body", lambda b: base64.b64decode(bytes(b)))
+        base64_response_body = field("base64_response_body", lambda b: base64.b64decode(b))
         file_response_body = field("file_response_body", _get_file_contents)
         json_response_body = field("json_response_body", json.loads)
         response_body = [s for s in (plaintext_response_body, base64_response_body, file_response_body, json_response_body) if s != None]
@@ -181,12 +180,17 @@ class Testcase(object):
         if len(response_body) > 1:
             raise ParseException("testcase", t.name, "More than one response body defined")
         elif len(response_body) == 1:
-            t.response_body = response_body[0]
-
-            # Special case for JSON response bodies - set the parser so that
-            # the response content is converted into JSON
-            if t.response_body == json_response_body:
-                t.response_body_parser = json.loads
+            # Provide a function that takes as input an HTTP response, and
+            # determines if the response body is legit based on the one
+            # provided in the testcase. JSON is compared against serialized
+            # versions; base64-encoded expected responses are compared against
+            # binary; otherwise, plaintext is compared.
+            if json_response_body:
+                t.response_body_checker = lambda response: response.json() == response_body[0]
+            elif base64_response_body:
+                t.response_body_checker = lambda response: response.content == response_body[0]
+            else:
+                t.response_body_checker = lambda response: response.text == response_body[0]
 
         # Set the testcase-specified python executable code
         create_compiler = lambda field_name: functools.partial(compile, filename="<%s field of %s>" % (field_name, t.name), mode="exec")

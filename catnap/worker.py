@@ -64,16 +64,8 @@ def execute_testcase(testcase, session=None, request_options={}):
             assert actual_value == value, "Expected header %s to be %s, but got %s" % (key, value, actual_value)
 
         # Validate the response body
-        if testcase.response_body:
-            actual_value = response.content
-
-            if testcase.response_body_parser:
-                try:
-                    actual_value = testcase.response_body_parser(actual_value)
-                except Exception as e:
-                    raise Exception("Could not parse the response body: %s" % str(e))
-
-            assert actual_value == testcase.response_body, "Unexpected response body"
+        if testcase.response_body_checker:
+            assert testcase.response_body_checker(response), "Unexpected response body"
 
         # Run the `on_response` code if specified
         if testcase.on_response:
