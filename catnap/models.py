@@ -153,7 +153,7 @@ class Testcase(object):
         t.body = None
         plaintext_body = field("body", lambda b: b)
         form_body = field("form_body", lambda b: urllib.urlencode(dict(b)))
-        base64_body = field("base64_body", lambda b: base64.b64decode(b))
+        base64_body = field("base64_body", lambda b: base64.b64decode(bytes(b)))
         file_body = field("file_body", _get_file_contents)
         body = [s for s in (plaintext_body, form_body, base64_body, file_body) if s != None]
 
@@ -171,7 +171,7 @@ class Testcase(object):
         # Set the expected response body
         t.response_body_checker = None
         plaintext_response_body = field("response_body", lambda b: b)
-        base64_response_body = field("base64_response_body", lambda b: base64.b64decode(b))
+        base64_response_body = field("base64_response_body", lambda b: base64.b64decode(bytes(b)))
         file_response_body = field("file_response_body", _get_file_contents)
         json_response_body = field("json_response_body", json.loads)
         response_body = [s for s in (plaintext_response_body, base64_response_body, file_response_body, json_response_body) if s != None]
