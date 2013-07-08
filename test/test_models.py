@@ -70,7 +70,7 @@ class TestModelTest(unittest.TestCase):
         self.assertEqual(t2.response_url, "http://www.google.com?redirect")
         self.assertEqual(t2.response_headers, { "foo": "baz" })
         self.assertEqual(t2.response_body_type, "base64_response_body")
-        self.assertEqual(t2.response_body, "hello")
+        self.assertEqual(t2.response_body, bytes("hello"))
         self.assertNotEqual(t2.on_request, None)
         self.assertNotEqual(t2.on_response, None)
 
@@ -171,7 +171,7 @@ class TestcaseModelTest(unittest.TestCase):
     def test_base64_response_body(self):
         testcase = self.build_testcase(base64_response_body="aGVsbG8=")
         self.assertEqual(testcase.response_body_type, "base64_response_body")
-        self.assertEqual(testcase.response_body, "hello")
+        self.assertEqual(testcase.response_body, bytes("hello"))
         self.assertRaises(catnap.ParseException, self.build_testcase, base64_response_body="invalid base64 string")
 
     def test_file_response_body(self):
