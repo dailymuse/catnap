@@ -39,3 +39,5 @@ testcases:
       bad: request
     code: 501
     response_url: http://localhost:8000/sample.bin
+    on_response: |
+      assert True, "Just checking that python code is parsed correctly in YAML files"

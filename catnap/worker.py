@@ -43,7 +43,7 @@ def execute_testcase(testcase, session=None, request_options={}):
     with catnap.TestcaseResult() as result:
         # Run the `on_request` code if specified
         if testcase.on_request:
-            exec(testcase.on_request in context)
+            exec(testcase.on_request, context)
 
         # Get the response
         response = session.send(request, **request_options)
@@ -79,6 +79,6 @@ def execute_testcase(testcase, session=None, request_options={}):
 
         # Run the `on_response` code if specified
         if testcase.on_response:
-            exec(testcase.on_response in context)
+            exec(testcase.on_response, context)
 
     return result
