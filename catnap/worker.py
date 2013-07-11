@@ -27,16 +27,19 @@ def execute_testcase(testcase, session=None, request_options={}):
     headers.update(testcase.headers)
 
     # Build the request
-    request = requests.Request(
-        testcase.method, testcase.url,
+    request_kwargs = dict(request_options)
+
+    request_kwargs.update(dict(
+        method=testcase.method,
+        url=testcase.url,
         headers=headers,
         data=testcase.body,
         params=testcase.query_params,
         auth=testcase.auth
-    ).prepare()
+    ))
 
     # Create a context for sharing with testcase-specified python code
-    context = dict(request=request, response=None, session=session, testcase=testcase)
+    context = dict(request_kwargs=request_kwargs, response=None, session=session, testcase=testcase)
 
     # Within this `with` block, stdout/stderr will be replaced and buffered
     # to a string for later output. Errors will be caught for display.
@@ -46,7 +49,7 @@ def execute_testcase(testcase, session=None, request_options={}):
             exec(testcase.on_request, context)
 
         # Get the response
-        response = session.send(request, **request_options)
+        response = session.request(**request_kwargs)
         context["response"] = response
 
         # Validate the response code
