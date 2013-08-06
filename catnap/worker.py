@@ -50,7 +50,9 @@ def execute_testcase(testcase, session=None, request_options={}):
 
         # Get the response
         response = session.request(**request_kwargs)
+        
         context["response"] = response
+        result.response = response
 
         # Validate the response code
         if testcase.code:

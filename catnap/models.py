@@ -89,6 +89,11 @@ class TestcaseResult(object):
     stdout/stderr with a string buffer for output capture.
     """
 
+    def __init__(self):
+        self._old_stdout = None
+        self._old_stderr = None
+        self.response = None
+
     def __enter__(self):
         # Temporarily replace stdout/stderr with a string buffer
         self._old_stdout = sys.stdout

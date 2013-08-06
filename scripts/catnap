@@ -54,6 +54,17 @@ def execute_test(test, enable_cookies, request_options, verbose=False):
                 print(catnap.tab("".join(formatted_error), 4))
             else:
                 print("  reason: %s" % str(result.error))
+
+            print("  status code: %s" % result.response.status_code)
+
+            if verbose:
+                print("  headers:")
+
+                for item in result.response.headers.items():
+                    print("    %s: %s" % item)
+
+            print("  body:")
+            print(catnap.tab(result.response.text, 4))
         
         # Print the buffered stdout/stderr if it exists
         if result.stdout:
