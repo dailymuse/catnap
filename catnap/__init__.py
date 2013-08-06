@@ -1,6 +1,6 @@
 from __future__ import absolute_import, division, print_function, with_statement, unicode_literals
 
-version = "0.4.0"
+version = "0.4.2"
 
 from .models import ParseException, Testcase, Test, TestcaseResult
 from .tabbing import tab, detab
