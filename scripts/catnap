@@ -55,7 +55,7 @@ def execute_test(test, enable_cookies, request_options, verbose=False):
             else:
                 print("  reason: %s" % str(result.error))
 
-            if result.response:
+            if result.response != None:
                 print("  status code: %s" % result.response.status_code)
 
                 if verbose:
