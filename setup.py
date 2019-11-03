@@ -15,7 +15,7 @@ setup(
 
     install_requires = [
         "PyYAML==3.10",
-        "requests==1.2.3",
+        "requests==2.20.0",
         "optfn==0.4.0"
     ]
 )
