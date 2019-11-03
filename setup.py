@@ -14,7 +14,7 @@ setup(
     scripts = ["scripts/catnap"],
 
     install_requires = [
-        "PyYAML==3.10",
+        "PyYAML==5.1",
         "requests==1.2.3",
         "optfn==0.4.0"
     ]
